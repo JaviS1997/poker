@@ -91,6 +91,26 @@ class Hand(object):
                         return True
         return False
 
+    def is_flush(self):
+        suit = self.cards[0].get_suit()
+        for i in range(1, 5):
+            if self.cards[i].get_suit() != suit:
+                return False
+        return True
+
+    def is_straight(self):
+        copy_cards = self.cards.copy()
+        self.cards.sort()
+        # check bicycle:
+        if self.cards[0].get_rank() == "2" and self.cards[1].get_rank() == "3" and self.cards[2].get_rank() == "4" and self.cards[3].get_rank() == "5" and self.cards[4].get_rank() == "A":
+            return True
+        for i in range(4):
+            if ranks.index(self.cards[i].get_rank()) + 1 != ranks.index(self.cards[i+1].get_rank()):
+                self.cards = copy_cards
+                return False
+        self.cards = copy_cards
+        return True
+
     def print_canvas(self, canvas):
         size = 200, 500
         # we print the corresponding picture on the canvas list
@@ -106,6 +126,10 @@ class Hand(object):
             canvas[i].create_image(20, 60, image=canvas[i].image, anchor='nw')
 
     def rank_hand(self):
+        if self.is_flush():
+            return "You have a flush"
+        if self.is_straight():
+            return "You have a straight"
         if self.is_three_of_kind():
             return "You have three of a kind"
         elif self.is_two_pair():
@@ -121,7 +145,7 @@ class GUI:
         bgcolor = "#20207f"
         title = "This program will deal 5 cards and tell you what hand you have got"
         window.title("Poker")
-        window.geometry("1400x700")
+        window.geometry("1450x700")
         window.resizable(0, 0)
 
         self.frame = Frame(master=window, bg=bgcolor)
@@ -148,8 +172,11 @@ class GUI:
         self.bt1 = Button(self.frame, text="Hit me!", command=self.deal)
         self.bt1.config(font=("Courier", 15))
         self.bt1.grid(row=1, column=1, columnspan=2)
+        self.bt3 = Button(self.frame, text="Get Premium", command=self.get_premium)
+        self.bt3.config(font=("Courier", 15))
+        self.bt3.grid(row=2, column=1, columnspan=2)
         self.bt2 = Button(self.frame, text="Exit Game", command=self.exit_game, bg="black", fg="yellow")
-        self.bt2.grid(row=2, column=2)
+        self.bt2.grid(row=3, column=2)
 
     def deal(self):
         new_deck = Deck()
@@ -157,6 +184,18 @@ class GUI:
         hand = Hand(new_deck)
         hand.print_canvas(self.canvas)
         self.label.config(text=hand.rank_hand())
+
+    def get_premium(self):
+        while True:
+            new_deck = Deck()
+            new_deck.shuffle()
+            hand = Hand(new_deck)
+
+            if hand.is_straight() or hand.is_flush():
+                hand.print_canvas(self.canvas)
+                break
+        self.label.config(text=hand.rank_hand())
+
 
     def exit_game(self):
         exit(0)
