@@ -90,7 +90,7 @@ class GUI:
                 return
             else:
                 self.label3.config(text=txt, fg='red')
-                self.canvas = self.game.printprint_canvas(self.canvas)
+                self.canvas = self.game.print_canvas(self.canvas)
                 return
         else:
             self.txt.delete(1, END)
